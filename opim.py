@@ -5,7 +5,7 @@ xc.py
 
 Copyright (c) 2018 Augusto Rallo and Márcio Pessoa
 
-Author: Augusto Rallo <augusto.rallo@telefonica.com>
+Author: Augusto Rallo <augusto.nascimento@telefonica.com>
 Author: Marcio Pessoa <marcio.pessoa@telefonica.com>
 Contributors: none
 
@@ -13,8 +13,9 @@ Change log: Check CHANGELOG.md file.
 
 """
 
-import sys
 import argparse
+import os
+import sys
 
 
 class UserArgumentParser():
@@ -33,12 +34,12 @@ class UserArgumentParser():
         self.program_license = "undefined. There is NO WARRANTY."
         self.program_website = "http://example.com/"
         self.program_contact = "Example <contact@example.com>"
-        self.services_file = os.path.join(os.getenv('HOME', ''),
+        self.services_file = os.path.join(os.getenv('OPIM_PATH', ''),
                                           'services.json')
-        header = ('xc <command> [<args>]\n\n' +
+        header = ('opim <command> [<args>]\n\n' +
                   'commands:\n' +
                   '  check          just check and display\n' +
-                  '  upload         check and upload monitoring data\n\n')
+                  '  upload         check and upload\n\n')
         footer = (self.program_copyright + '\n' +
                   'License: ' + self.program_license + '\n' +
                   'Website: ' + self.program_website + '\n' +
@@ -63,7 +64,7 @@ class UserArgumentParser():
             sys.exit(False)
         args = parser.parse_args(sys.argv[1:2])
         if not hasattr(self, args.command):
-            echoln('Unrecognized command')
+            print('Unrecognized command')
             parser.print_help()
             sys.exit(True)
         getattr(self, args.command)()

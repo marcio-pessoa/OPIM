@@ -1,1 +1,48 @@
-#!/bin/sh
+#!/bin/bash
+# 
+# opim
+# 
+# Author:
+#   Augusto Rallo <augusto.nascimento@telefonica.com>
+#   Márcio Pessoa <marcio.pessoa@telefonica.com>
+# Contributors: none
+# 
+# Description:
+#   Start up script file
+# 
+# Example:
+#   opim -h
+# 
+# Change log:
+# 2018-09-17
+#          * Added: mutiple verbosity support.
+#
+
+export OPIM_PATH='/opt/telefonica/opim'
+readonly WORK_FILE='opim.pyc'
+
+# Default values
+command="upload"
+verbosity=3
+
+# Identify user defined verbosity
+declare -a args=($@)
+for (( i = 0; i < ${#args[*]}; i++ )); do
+  if [ "${args[$i]}" == "--verbosity" ] || [ "${args[$i]}" == "-v" ]; then
+    verbosity=${args[$i+1]}
+    break
+  fi
+  if [ "$(echo "${args[$i]}" | cut -d '=' -f 1)" == "--verbosity" ]; then
+    verbosity=$(echo "${args[$i]}" | cut -d '=' -f 2)
+    break
+  fi
+done
+
+# Apply desired command
+if [ "$#" -eq 0 ]; then
+  python "$OPIM_PATH"/"$WORK_FILE" "$command" --verbosity="$verbosity"
+  exit ${PIPESTATUS[0]}
+else
+  python "$OPIM_PATH"/"$WORK_FILE" "$@" --verbosity="$verbosity"
+  exit ${PIPESTATUS[0]}
+fi
