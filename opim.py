@@ -14,6 +14,7 @@ Change log: Check CHANGELOG.md file.
 """
 
 import argparse
+import json
 import os
 import sys
 
