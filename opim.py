@@ -17,6 +17,8 @@ import argparse
 import json
 import os
 import sys
+from socket import gethostname
+from subprocess import call, check_output, CalledProcessError, Popen, PIPE
 from file import File
 
 
@@ -37,6 +39,7 @@ class UserArgumentParser():
         self.program_website = "http://example.com/"
         self.program_contact = "Example <contact@example.com>"
         self.debug = True
+        self.status = ["OK", "Warning", "Critical", "Unknown"]
         self.config_file = os.path.join(os.getenv('OPIM_PATH', ''),
                                         'opim.json')
         header = ('opim <command> [<args>]\n\n' +
@@ -85,50 +88,89 @@ class UserArgumentParser():
         args = parser.parse_args(sys.argv[2:])
         self.config = File()
         self.config.load(self.config_file, 'json')
-        self.__hosts_walk()
+        self.__services_walk()
         sys.exit(False)
 
-    def __host_reset(self):
+    def __service_reset(self):
         '''Set default values'''
-        defaults = self.config.get()['host']["_default"]
-        host = {}
-        host["description"] = defaults["description"]
-        host["protocol"] = defaults["protocol"]
-        host["port"] = defaults["port"]
-        host["warning"] = defaults["warning"]
-        host["critical"] = defaults["critical"]
-        host["command"] = defaults["command"]
-        return host
+        defaults = self.config.get()["service"]["_default"]
+        service = {}
+        service["description"] = defaults["description"]
+        service["protocol"] = defaults["protocol"]
+        service["port"] = defaults["port"]
+        service["warning"] = defaults["warning"]
+        service["critical"] = defaults["critical"]
+        service["command"] = defaults["command"]
+        return service
 
-    def __hosts_walk(self):
-        for name in self.config.get()["host"]:
-            items = self.config.get()["host"][name]
-            host = self.__host_reset()
-            host["enable"] = items["enable"]
-            if not host["enable"]:
+    def __services_walk(self):
+        for name in self.config.get()["service"]:
+            items = self.config.get()["service"][name]
+            service = self.__service_reset()
+            service["enable"] = items["enable"]
+            if not service["enable"]:
                 continue
-            host["name"] = name
-            host["description"] = items["description"]
-            host["address"] = items["address"]
-            host["port"] = items["port"]
-            host["protocol"] = items["protocol"]
-            # host["warning"] = items["warning"]
-            # host["critical"] = items["critical"]
+            # Load main arguments
+            service["name"] = name
+            service["description"] = items["description"]
+            service["address"] = items["address"]
+            service["port"] = items["port"]
+            service["protocol"] = items["protocol"]
+            # Try to load optional arguments
+            try:
+                service["warning"] = items["warning"]
+            except BaseException:
+                pass
+            try:
+                service["critical"] = items["critical"]
+            except BaseException:
+                pass
             if self.debug:
-                print("Host: " + host["name"])
-                print("    Description: " + host["description"])
-                print("    Address: " + str(host["address"]) + ":" +
-                      str(host["port"]))
-                print("    Command:" + host["command"])
+                print("Service: " + service["name"])
+                print("    Description: " + service["description"])
+                print("    Address: " + str(service["address"]) + ":" +
+                      str(service["port"]))
+                print("    Command: " + service["command"])
                 print("    Thresholds:")
-                print("        Warning: " + str(host["warning"]))
-                print("        Critical: " + str(host["critical"]))
-            command = self.config.get()["command"][host["command"]]
-            command["line"] = os.path.join(command["path"], command["file"]) + \
-                              command["options"]
-            print command["line"]
-            # return_code = os.system(command["line"])
-            print
+                print("        Warning: " + str(service["warning"]))
+                print("        Critical: " + str(service["critical"]))
+            command = self.config.get()["command"][service["command"]]
+            command["line"] = os.path.join(command["path"], command["file"])
+            command["line"] += " " + command["options"]
+            command["line"] = command["line"].replace("$HOSTADDRESS$",
+                                                      service["address"])
+            command["line"] = command["line"].replace("$ARG1$",
+                                                      str(service["warning"]))
+            command["line"] = command["line"].replace("$ARG2$",
+                                                      str(service["critical"]))
+            command["line"] = command["line"].replace("$ARG3$",
+                                                      str(service["port"]))
+            if self.debug:
+                print("Command line: " + command["line"])
+            # Run check command
+            p = Popen(command["line"].split(" "), stdout=PIPE)
+            (output, err) = p.communicate()
+            service["output"] = output.strip('\n')
+            service["state"] = p.wait()
+            if self.debug:
+                print("Plugin output: " + service["output"])
+                print("Status: " + self.status[service["state"]])
+            # Send results to NRDP server
+            nagios = self.config.get()["nagios"]
+            nagios["url"] = nagios["protocol"] + nagios["address"] + \
+                            nagios["service"]
+            command["send"] = "/opt/telefonica/opim/send_nrdp.py" + \
+                              " --url=" + nagios["url"] + \
+                              " --token=" + nagios["token"] + \
+                              " --hostname=" + gethostname() + \
+                              " --service=" + service["name"] + \
+                              " --state=" + str(service["state"]) + \
+                              " --output='" + str(service["output"]) +"'"
+            if self.debug:
+                print("Command send: " + command["send"])
+            call(command["send"], shell=True)
+            if self.debug:
+                print
 
 
 def main():
