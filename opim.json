@@ -32,58 +32,58 @@
       "description": "Sprayer Redirector @Local BE (LB VIP)",
       "protocol": "TCP",
       "port": 7776,
-      "enable": true
+      "enable": false
     },
     "OP_Sprayer_Listener_1": {
       "address": "177.16.30.2",
       "description": "Sprayer Listener @Local BE",
       "protocol": "TCP",
       "port": 7777,
-      "enable": true
+      "enable": false
     },
     "OP_Sprayer_Listener_2": {
       "address": "177.16.30.3",
       "description": "Sprayer Listener @Local BE",
       "protocol": "TCP",
       "port": 7778,
-      "enable": true
+      "enable": false
     },
     "OP_Sprayer_Listener_3": {
       "address": "177.16.30.4",
       "description": "Sprayer Listener @Local BE",
       "protocol": "TCP",
       "port": 7779,
-      "enable": true
+      "enable": false
     },
     "OP_Datahub": {
       "address": "177.16.30.8",
       "description": "Device EndPoint @Local BE (LB VIP)",
       "protocol": "TCP",
       "port": 80,
-      "enable": true
+      "enable": false
     },
-    "OP_Nagra_1": {
+    "OP_NAGRA_1": {
       "address": "177.16.30.37",
       "description": "PLM Service @Local BE (LB VIP)",
       "protocol": "TCP",
       "port": 443,
       "enable": false
     },
-    "OP_Nagra_2": {
+    "OP_NAGRA_2": {
       "address": "54.77.149.134",
       "description": "Proxy to PVS Service @Internet",
       "protocol": "TCP",
       "port": 443,
       "enable": false
     },
-    "OP_Nagra_3": {
+    "OP_NAGRA_3": {
       "address": "34.248.229.7",
       "description": "Proxy to PVS Service @Internet",
       "protocol": "TCP",
       "port": 443,
-      "enable": false
+      "enable": true
     },
-    "OP_Nagra_4": {
+    "OP_NAGRA_4": {
       "address": "52.19.46.206",
       "description": "Proxy to PVS Service @Internet",
       "protocol": "TCP",
@@ -130,7 +130,7 @@
       "description": "Content API@CDN Awanodes/IP Network",
       "protocol": "TCP",
       "port": 80,
-      "enable": false
+      "enable": true
     },
     "OP_Record_and_Search": {
       "address": "200.161.71.38",

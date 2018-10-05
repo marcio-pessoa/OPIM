@@ -38,7 +38,7 @@ class UserArgumentParser():
         self.program_license = "undefined. There is NO WARRANTY."
         self.program_website = "http://example.com/"
         self.program_contact = "Example <contact@example.com>"
-        self.debug = True
+        self.debug = False
         self.status = ["OK", "Warning", "Critical", "Unknown"]
         self.config_file = os.path.join(os.getenv('OPIM_PATH', ''),
                                         'opim.json')
@@ -91,6 +91,22 @@ class UserArgumentParser():
         self.__services_walk()
         sys.exit(False)
 
+    def upload(self):
+        parser = argparse.ArgumentParser(
+            prog=self.program_name + ' upload',
+            description='check and upload')
+        parser.add_argument(
+            '-v', '--verbosity', type=int,
+            default=1,
+            choices=[0, 1, 2, 3],
+            help='verbose mode, options: ' +
+                 '0 Quiet, 1 Errors (default), 2 Warnings, 3 Info')
+        args = parser.parse_args(sys.argv[2:])
+        self.config = File()
+        self.config.load(self.config_file, 'json')
+        self.__services_walk(True)
+        sys.exit(False)
+
     def __service_reset(self):
         '''Set default values'''
         defaults = self.config.get()["service"]["_default"]
@@ -103,12 +119,13 @@ class UserArgumentParser():
         service["command"] = defaults["command"]
         return service
 
-    def __services_walk(self):
+    def __services_walk(self, upload=False):
         for name in self.config.get()["service"]:
             items = self.config.get()["service"][name]
             service = self.__service_reset()
             service["enable"] = items["enable"]
-            if not service["enable"]:
+            if not service["enable"] or \
+               name == "_default":
                 continue
             # Load main arguments
             service["name"] = name
@@ -148,16 +165,22 @@ class UserArgumentParser():
             if self.debug:
                 print("Command line: " + command["line"])
             # Run check command
+            print("Checking: " + service["name"] + "..."),
+            sys.stdout.flush()
             p = Popen(command["line"].split(" "), stdout=PIPE)
             (output, err) = p.communicate()
             service["output"] = output.strip('\n')
             service["state"] = p.wait()
             if self.debug:
-                print("Plugin output: " + service["output"])
                 print("Status: " + self.status[service["state"]])
+            print("Output: " + service["output"])
+            sys.stdout.flush()
             # Send results to NRDP server
+            if not upload:
+                continue
             nagios = self.config.get()["nagios"]
-            nagios["url"] = nagios["protocol"] + nagios["address"] + \
+            nagios["url"] = nagios["protocol"] + \
+                            nagios["address"] + \
                             nagios["service"]
             command["send"] = "/opt/telefonica/opim/send_nrdp.py" + \
                               " --url=" + nagios["url"] + \
@@ -165,7 +188,7 @@ class UserArgumentParser():
                               " --hostname=" + gethostname() + \
                               " --service=" + service["name"] + \
                               " --state=" + str(service["state"]) + \
-                              " --output='" + str(service["output"]) +"'"
+                              " --output='" + str(service["output"]) + "'"
             if self.debug:
                 print("Command send: " + command["send"])
             call(command["send"], shell=True)
