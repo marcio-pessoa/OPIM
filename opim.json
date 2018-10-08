@@ -23,8 +23,8 @@
       "protocol": "TCP",
       "port": 80,
       "command": "check_http",
-      "warning": 10,
-      "critical": 20,
+      "warning": 0.2,
+      "critical": 0.4,
       "enable": false
     },
     "OP_Sprayer_Redirector": {
@@ -67,6 +67,8 @@
       "description": "PLM Service @Local BE (LB VIP)",
       "protocol": "TCP",
       "port": 443,
+      "warning": 0.8,
+      "critical": 1,
       "enable": false
     },
     "OP_NAGRA_2": {
@@ -81,6 +83,8 @@
       "description": "Proxy to PVS Service @Internet",
       "protocol": "TCP",
       "port": 443,
+      "warning": 0.8,
+      "critical": 1,
       "enable": true
     },
     "OP_NAGRA_4": {
