@@ -30,8 +30,8 @@ class UserArgumentParser():
 
     def __init__(self):
         self.program_name = "OPIM"
-        self.program_version = "0.00b"
-        self.program_date = "2018-09-14"
+        self.program_version = "0.02b"
+        self.program_date = "2018-10-17"
         self.program_description = "Open Platform Infrastructure Management"
         self.program_copyright = "Copyright (c) 2018 " + \
                                  "Augusto Rallo and Marcio Pessoa"
@@ -151,49 +151,56 @@ class UserArgumentParser():
                 print("    Thresholds:")
                 print("        Warning: " + str(service["warning"]))
                 print("        Critical: " + str(service["critical"]))
-            command = self.config.get()["command"][service["command"]]
-            command["line"] = os.path.join(command["path"], command["file"])
-            command["line"] += " " + command["options"]
-            command["line"] = command["line"].replace("$HOSTADDRESS$",
-                                                      service["address"])
-            command["line"] = command["line"].replace("$ARG1$",
-                                                      str(service["warning"]))
-            command["line"] = command["line"].replace("$ARG2$",
-                                                      str(service["critical"]))
-            command["line"] = command["line"].replace("$ARG3$",
-                                                      str(service["port"]))
-            if self.debug:
-                print("Command line: " + command["line"])
-            # Run check command
-            print("Checking: " + service["name"] + "..."),
-            sys.stdout.flush()
-            p = Popen(command["line"].split(" "), stdout=PIPE)
-            (output, err) = p.communicate()
-            service["output"] = output.strip('\n')
-            service["state"] = p.wait()
+            (service["state"], service["output"]) = self.__check_run(service)
             if self.debug:
                 print("Status: " + self.status[service["state"]])
             print("Output: " + service["output"])
             sys.stdout.flush()
             # Send results to NRDP server
-            if not upload:
-                continue
-            nagios = self.config.get()["nagios"]
-            nagios["url"] = nagios["protocol"] + \
-                            nagios["address"] + \
-                            nagios["service"]
-            command["send"] = "/opt/telefonica/opim/send_nrdp.py" + \
-                              " --url=" + nagios["url"] + \
-                              " --token=" + nagios["token"] + \
-                              " --hostname=" + gethostname() + \
-                              " --service=" + service["name"] + \
-                              " --state=" + str(service["state"]) + \
-                              " --output='" + str(service["output"]) + "'"
-            if self.debug:
-                print("Command send: " + command["send"])
-            call(command["send"], shell=True)
+            if upload:
+                self.__send_nrdp(service)
             if self.debug:
                 print
+
+    def __check_run(self, service):
+        # Build command line
+        command = self.config.get()["command"][service["command"]]
+        command["line"] = os.path.join(command["path"], command["file"])
+        command["line"] += " " + command["options"]
+        command["line"] = command["line"].replace("$HOSTADDRESS$",
+                                                  service["address"])
+        command["line"] = command["line"].replace("$ARG1$",
+                                                  str(service["warning"]))
+        command["line"] = command["line"].replace("$ARG2$",
+                                                  str(service["critical"]))
+        command["line"] = command["line"].replace("$ARG3$",
+                                                  str(service["port"]))
+        if self.debug:
+            print("Command line: " + command["line"])
+        # Run check command
+        print("Checking: " + service["name"] + "..."),
+        sys.stdout.flush()
+        p = Popen(command["line"].split(" "), stdout=PIPE)
+        (output, err) = p.communicate()
+        output = output.strip('\n')
+        state = p.wait()
+        return (state, output)
+
+    def __send_nrdp(self, service):
+        nagios = self.config.get()["nagios"]
+        nagios["url"] = nagios["protocol"] + \
+                        nagios["address"] + \
+                        nagios["service"]
+        command = "/opt/telefonica/opim/send_nrdp.py" + \
+                  " --url=" + nagios["url"] + \
+                  " --token=" + nagios["token"] + \
+                  " --hostname=" + gethostname() + \
+                  " --service=" + service["name"] + \
+                  " --state=" + str(service["state"]) + \
+                  " --output='" + str(service["output"]) + "'"
+        if self.debug:
+            print("Command send: " + command)
+        call(command, shell=True)
 
 
 def main():
