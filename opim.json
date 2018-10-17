@@ -11,6 +11,11 @@
       "file": "check_http",
       "options": "-H $HOSTADDRESS$ --warning=$ARG1$ --critical=$ARG2$ --port=$ARG3$ --timeout=5 --expect=HTTP"
     },
+    "check_dns": {
+      "path": "/usr/lib/nagios/plugins",
+      "file": "check_dns",
+      "options": "-H www.google.com -s $HOSTADDRESS$ -w 0.1 -c 0.5"
+    },
     "check_ntp": {
       "path": "/usr/lib/nagios/plugins",
       "file": "",
@@ -81,7 +86,6 @@
     "OP_NAGRA_3": {
       "address": "34.248.229.7",
       "description": "Proxy to PVS Service @Internet",
-      "protocol": "TCP",
       "port": 443,
       "warning": 0.8,
       "critical": 1,
@@ -167,9 +171,9 @@
     "OP_DNS": {
       "address": "177.16.30.7",
       "description": "DNS@Local BE(LB VIP)",
-      "protocol": "UDP",
+      "command": "check_dns",
       "port": 53,
-      "enable": false
+      "enable": true
     },
     "OP_NTP": {
       "address": "177.16.30.7",

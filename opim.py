@@ -112,7 +112,6 @@ class UserArgumentParser():
         defaults = self.config.get()["service"]["_default"]
         service = {}
         service["description"] = defaults["description"]
-        service["protocol"] = defaults["protocol"]
         service["port"] = defaults["port"]
         service["warning"] = defaults["warning"]
         service["critical"] = defaults["critical"]
@@ -132,7 +131,10 @@ class UserArgumentParser():
             service["description"] = items["description"]
             service["address"] = items["address"]
             service["port"] = items["port"]
-            service["protocol"] = items["protocol"]
+            try:
+                service["command"] = items["command"]
+            except BaseException:
+                pass
             # Try to load optional arguments
             try:
                 service["warning"] = items["warning"]
