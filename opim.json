@@ -14,12 +14,12 @@
     "check_dns": {
       "path": "/usr/lib/nagios/plugins",
       "file": "check_dns",
-      "options": "-H www.google.com -s $HOSTADDRESS$ -w 0.1 -c 0.5"
+      "options": "-H www.google.com -s $HOSTADDRESS$ --warning=$ARG1$ --critical=$ARG2$"
     },
     "check_ntp": {
       "path": "/usr/lib/nagios/plugins",
-      "file": "",
-      "command": ""
+      "file": "check_ntp_peer",
+      "options": "-H $HOSTADDRESS$ --warning=$ARG1$ --critical=$ARG2$"
     }
   },
   "service": {
@@ -37,53 +37,53 @@
       "description": "Sprayer Redirector @Local BE (LB VIP)",
       "protocol": "TCP",
       "port": 7776,
-      "enable": false
+      "enable": true
     },
     "OP_Sprayer_Listener_1": {
       "address": "177.16.30.2",
       "description": "Sprayer Listener @Local BE",
       "protocol": "TCP",
       "port": 7777,
-      "enable": false
+      "enable": true
     },
     "OP_Sprayer_Listener_2": {
       "address": "177.16.30.3",
       "description": "Sprayer Listener @Local BE",
       "protocol": "TCP",
       "port": 7778,
-      "enable": false
+      "enable": true
     },
     "OP_Sprayer_Listener_3": {
       "address": "177.16.30.4",
       "description": "Sprayer Listener @Local BE",
       "protocol": "TCP",
       "port": 7779,
-      "enable": false
+      "enable": true
     },
     "OP_Datahub": {
       "address": "177.16.30.8",
       "description": "Device EndPoint @Local BE (LB VIP)",
       "protocol": "TCP",
       "port": 80,
-      "enable": false
+      "enable": true
     },
-    "OP_NAGRA_1": {
+    "OP_NAGRA_PLM": {
       "address": "177.16.30.37",
       "description": "PLM Service @Local BE (LB VIP)",
       "protocol": "TCP",
       "port": 443,
       "warning": 0.8,
       "critical": 1,
-      "enable": false
+      "enable": true
     },
-    "OP_NAGRA_2": {
+    "OP_NAGRA_PVS_1": {
       "address": "54.77.149.134",
       "description": "Proxy to PVS Service @Internet",
       "protocol": "TCP",
       "port": 443,
-      "enable": false
+      "enable": true
     },
-    "OP_NAGRA_3": {
+    "OP_NAGRA_PVS_2": {
       "address": "34.248.229.7",
       "description": "Proxy to PVS Service @Internet",
       "port": 443,
@@ -91,47 +91,49 @@
       "critical": 1,
       "enable": true
     },
-    "OP_NAGRA_4": {
+    "OP_NAGRA_PVS_3": {
       "address": "52.19.46.206",
       "description": "Proxy to PVS Service @Internet",
       "protocol": "TCP",
       "port": 443,
-      "enable": false
+      "warning": 0.6,
+      "critical": 0.9,
+      "enable": true
     },
     "OP_VSA_1": {
       "address": "177.16.30.252",
       "description": "FCC Server@IP Network",
       "protocol": "UDP",
       "port": 4096,
-      "enable": false
+      "enable": true
     },
     "OP_VSA_2": {
       "address": "177.16.30.253",
       "description": "FCC Server@IP Network",
       "protocol": "UDP",
       "port": 4096,
-      "enable": false
+      "enable": true
     },
     "OP_VSA_3": {
       "address": "177.16.30.254",
       "description": "RET Server@IP Network",
       "protocol": "UDP",
       "port": 4098,
-      "enable": false
+      "enable": true
     },
     "OP_VSA_4": {
       "address": "177.16.30.255",
       "description": "RET Server@IP Network",
       "protocol": "UDP",
       "port": 4098,
-      "enable": false
+      "enable": true
     },
     "OP_UNIAPI": {
       "address": "172.28.0.32",
       "description": "UNIAPI@Global BE (LB VIP)",
       "protocol": "TCP",
       "port": 443,
-      "enable": false
+      "enable": true
     },
     "OP_Content_API": {
       "address": "200.161.71.8",
@@ -145,7 +147,7 @@
       "description": "RAP @CDN Awanodes/IP Network",
       "protocol": "TCP",
       "port": 443,
-      "enable": false
+      "enable": true
     },
     "OP_Spotlight": {
       "address": "200.161.71.45",
@@ -159,35 +161,37 @@
       "description": "PR Issuer@Global BE(LB VIP)",
       "protocol": "TCP",
       "port": 443,
-      "enable": false
+      "enable": true
     },
     "OP_TV_Apps": {
       "address": "195.235.93.24",
       "description": "TV Apps @Local BE (today @Toninas)(LB VIP)",
       "protocol": "TCP",
       "port": 87,
-      "enable": false
+      "enable": true
     },
     "OP_DNS": {
       "address": "177.16.30.7",
       "description": "DNS@Local BE(LB VIP)",
       "command": "check_dns",
       "port": 53,
+      "warning": 0.2,
+      "critical": 0.5,
       "enable": true
     },
     "OP_NTP": {
       "address": "177.16.30.7",
       "description": "NTP@Local BE(LB VIP)",
-      "protocol": "UDP",
+      "command": "check_ntp",
       "port": 123,
-      "enable": false
+      "enable": true
     },
     "OP_Auto_Provisioning": {
       "address": "177.79.246.170",
       "description": "Auto-Provisioning API(LB-VIP)@IP Network",
       "protocol": "TCP",
       "port": 443,
-      "enable": false
+      "enable": true
     }
   }
 }

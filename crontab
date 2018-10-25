@@ -1,2 +1,2 @@
-# OPIM - Open Platform Infrastructure Monitoring running each 5 minutes
-*/5 * * * *	/opt/telefonica/opim/opim >> /var/log/opim.log 2>&1
+# OPIM - Open Platform Infrastructure Monitoring running each 3 minutes
+*/3 * * * *	/opt/telefonica/opim/opim upload >> /var/log/opim.log 2>&1

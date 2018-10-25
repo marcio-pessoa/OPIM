@@ -1,11 +1,12 @@
 # OPIM
 Open Platform Infrastructure Monitoring
 
-# Introduction
+## Introduction
+![Screenshot](Documents/Pictures/Screenshot.png)
 
-# How it works
+## How it works
 
-# Installation
+## Installation
 Default installation directory:
 `
 /opt/telefonica/opim
@@ -15,6 +16,6 @@ Default installation directory:
 
 ```
 
-# Configuration
+## Configuration
 
 ---
